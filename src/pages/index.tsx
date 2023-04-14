@@ -3,11 +3,33 @@ import Head from "next/head";
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { api } from "@/utils/api";
 
-const Home: NextPage = () => {
-  const user = useUser();
+const CreatePostWizard = () => {
+  const { user } = useUser();
 
-  const { data } = api.posts.getAll.useQuery();
-  console.log(data);
+  if (!user) return null;
+
+  return (
+    <div className="flex w-full gap-4">
+      <img
+        src={user.profileImageUrl}
+        alt="Profile image"
+        className="h-14 w-14 rounded-full"
+      />
+      <input
+        type="text"
+        placeholder="Type some emojis!"
+        className="grow bg-transparent outline-none"
+      />
+    </div>
+  );
+};
+
+const Home: NextPage = () => {
+  const { data, isLoading } = api.posts.getAll.useQuery();
+
+  if (!data || isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -17,16 +39,19 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        {!user.isSignedIn && <SignInButton />}
-        {user.isSignedIn && <SignOutButton />}
+      <main className="flex h-screen justify-center">
+        <div className="h-full w-full border-x border-zinc-700 md:max-w-2xl">
+          <div className="flex border-b border-zinc-700 p-4">
+            <CreatePostWizard />
+          </div>
 
-        <div>
-          {data?.map((post) => (
-            <div key={post.id}>
-              <h1>{post.content}</h1>
-            </div>
-          ))}
+          <div className="flex flex-col">
+            {data?.map((post) => (
+              <div key={post.id} className="border-b border-zinc-700 p-8">
+                <h1>{post.content}</h1>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </>
