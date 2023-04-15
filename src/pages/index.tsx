@@ -1,12 +1,14 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import { api } from "@/utils/api";
+import { useUser } from "@clerk/nextjs";
+import { type RouterOutputs, api } from "@/utils/api";
 
 const CreatePostWizard = () => {
   const { user } = useUser();
 
   if (!user) return null;
+
+  console.log(user);
 
   return (
     <div className="flex w-full gap-4">
@@ -24,12 +26,24 @@ const CreatePostWizard = () => {
   );
 };
 
+type PostWithAuthor = RouterOutputs["posts"]["getAll"][number];
+const PostView = ({ post, author }: PostWithAuthor) => {
+  return (
+    <div key={post.id} className="border-b border-zinc-700 p-8">
+      <h1>{post.content}</h1>
+      <p>{author?.username}</p>
+    </div>
+  );
+};
+
 const Home: NextPage = () => {
   const { data, isLoading } = api.posts.getAll.useQuery();
 
   if (!data || isLoading) {
     return <div>Loading...</div>;
   }
+
+  console.log("data", data);
 
   return (
     <>
@@ -47,9 +61,7 @@ const Home: NextPage = () => {
 
           <div className="flex flex-col">
             {data?.map((post) => (
-              <div key={post.id} className="border-b border-zinc-700 p-8">
-                <h1>{post.content}</h1>
-              </div>
+              <PostView key={post.post.id} {...post} />
             ))}
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 ## Built with
 
-- Next.js
-- tRPC
-- Prisma
-- Tailwind CSS
+- Next.js + typescript + trpc
+- Prisma (mysql)
+- Tailwind (styling)
+- Clerk (auth)
