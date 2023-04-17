@@ -1,10 +1,11 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { type RouterOutputs, api } from "@/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import { LoadingSpinner } from "@/components/loading";
 
 dayjs.extend(relativeTime);
 
@@ -12,8 +13,6 @@ const CreatePostWizard = () => {
   const { user } = useUser();
 
   if (!user) return null;
-
-  console.log(user);
 
   return (
     <div className="flex w-full gap-4">
@@ -36,7 +35,7 @@ const CreatePostWizard = () => {
 type PostWithAuthor = RouterOutputs["posts"]["getAll"][number];
 const PostView = ({ post, author }: PostWithAuthor) => {
   return (
-    <div key={post.id} className="flex gap-4 border-b border-zinc-700 p-4">
+    <div key={post.id} className="flex gap-4 border-b border-zinc-800 p-4">
       <Image
         src={author.profileImageUrl}
         alt={`Profile image for ${author.username}`}
@@ -55,14 +54,44 @@ const PostView = ({ post, author }: PostWithAuthor) => {
   );
 };
 
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+
+  if (postsLoading)
+    return (
+      <div className="relative flex flex-col">
+        <LoadingSpinner />
+      </div>
+    );
+
+  if (!data) return <div>Something went wrong.</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data?.map((post) => (
+        <PostView key={post.post.id} {...post} />
+      ))}
+    </div>
+  );
+};
+
+const PageLayout = ({ children }: { children?: React.ReactNode }) => {
+  return (
+    <main className="flex h-screen justify-center">
+      <div className="h-full w-full border-x border-zinc-800 md:max-w-2xl">
+        {children}
+      </div>
+    </main>
+  );
+};
+
 const Home: NextPage = () => {
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  if (!data || isLoading) {
-    return <div>Loading...</div>;
-  }
+  // start fetching asap
+  api.posts.getAll.useQuery();
 
-  console.log("data", data);
+  if (!userLoaded) return null;
 
   return (
     <>
@@ -72,19 +101,18 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-zinc-700 md:max-w-2xl">
-          <div className="flex border-b border-zinc-700 p-4">
-            <CreatePostWizard />
-          </div>
-
-          <div className="flex flex-col">
-            {data?.map((post) => (
-              <PostView key={post.post.id} {...post} />
-            ))}
-          </div>
+      <PageLayout>
+        <div className="relative flex border-b border-zinc-800 p-4">
+          {!isSignedIn && (
+            <div className="flex justify-center">
+              <SignInButton />
+            </div>
+          )}
+          {isSignedIn && <CreatePostWizard />}
         </div>
-      </main>
+
+        <Feed />
+      </PageLayout>
     </>
   );
 };
