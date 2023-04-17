@@ -3,7 +3,7 @@
 ## Built with
 
 - Next.js + typescript + trpc
-- Prisma (mysql)
+- Prisma + planetscale (mysql)
 - Tailwind (styling)
 - Clerk (auth)
 - Upstash (rate limiting)
