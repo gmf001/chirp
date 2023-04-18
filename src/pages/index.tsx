@@ -7,6 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingSpinner } from "@/components/loading";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -22,28 +23,60 @@ const CreatePostWizard = () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
     },
+    onError: (err) => {
+      const errMessage = err.data?.zodError?.fieldErrors?.content;
+
+      if (errMessage && errMessage[0]) {
+        return toast.error(errMessage[0]);
+      }
+
+      toast.error("Something went wrong. Please try again.");
+    },
   });
 
   if (!user) return null;
 
   return (
-    <div className="flex w-full gap-4">
+    <div className="flex w-full items-center gap-4">
       <Image
         src={user.profileImageUrl}
         alt="Profile image"
         className="h-14 w-14 rounded-full"
         height={56}
         width={56}
+        priority
       />
       <input
         type="text"
         placeholder="Type some emojis!"
         className="grow bg-transparent outline-none"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (input !== "") {
+              mutate({ content: input });
+            }
+          }
+        }}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
       />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      {input !== "" && !isPosting && (
+        <button
+          className="text-sm font-bold uppercase text-blue-300 disabled:text-gray-700"
+          disabled={isPosting}
+          onClick={() => mutate({ content: input })}
+        >
+          Post
+        </button>
+      )}
+
+      {isPosting && (
+        <div className="relative flex h-[20px] w-[20px] items-center justify-center">
+          <LoadingSpinner size={20} top={0} />
+        </div>
+      )}
     </div>
   );
 };
@@ -60,7 +93,7 @@ const PostView = ({ post, author }: PostWithAuthor) => {
         width={56}
         height={56}
       />
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <div className="flex gap-1 text-sm  text-slate-200">
           <span className="font-semibold text-blue-200">{`@${author.username}`}</span>
           <span>{` ·  ${dayjs(post.createdAt).fromNow()}`}</span>
