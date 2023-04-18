@@ -7,6 +7,7 @@ import SuperJSON from "superjson";
 import { appRouter } from "@/server/api/root";
 import NextError from "next/error";
 import { PageLayout } from "@/components/page-layout";
+import Image from "next/image";
 
 const ProfilePage: NextPage<{ username: string }> = (props) => {
   const { data: userProfile } = api.profile.getUserByUsername.useQuery({
@@ -22,7 +23,22 @@ const ProfilePage: NextPage<{ username: string }> = (props) => {
       </Head>
 
       <PageLayout>
-        <pre>{JSON.stringify(userProfile, null, 2)}</pre>
+        <div className="relative h-36 bg-blue-400">
+          <Image
+            src={userProfile.profileImageUrl}
+            alt={`@${props.username}'s profile pic`}
+            width={128}
+            height={128}
+            className="absolute bottom-0 left-0 -mb-[60px] ml-4 rounded-full border-4 border-black bg-black"
+          />
+        </div>
+        <div className="h-[60px]"></div>
+        <div className="p-4">
+          <h1 className="text-2xl font-bold">{`@${
+            userProfile.username ?? ""
+          }`}</h1>
+        </div>
+        <div className="w-full border-b border-zinc-800"></div>
       </PageLayout>
     </>
   );
