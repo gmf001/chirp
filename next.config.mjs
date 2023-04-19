@@ -22,5 +22,16 @@ const config = {
   images: {
     domains: ["images.clerk.dev"],
   },
+
+  // faster builds on vercel, now using github actions
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // alernative to babel
+  swcMinify: true,
 };
 export default config;

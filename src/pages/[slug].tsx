@@ -1,14 +1,11 @@
 import { api } from "@/utils/api";
-import { type GetStaticPaths, type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import { prisma } from "@/server/db";
-import SuperJSON from "superjson";
-import { appRouter } from "@/server/api/root";
 import NextError from "next/error";
-import { PageLayout } from "@/components/page-layout";
 import Image from "next/image";
+import { PageLayout } from "@/components/page-layout";
 import { ProfileFeed } from "@/components/profile-feed";
+import { generateSSGHelper } from "@/server/ssgHelper";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 
 const ProfilePage: NextPage<{ username: string }> = (props) => {
   const { data: userProfile } = api.profile.getUserByUsername.useQuery({
@@ -47,11 +44,7 @@ const ProfilePage: NextPage<{ username: string }> = (props) => {
 };
 
 export const getStaticProps: GetStaticProps = async (ctx) => {
-  const ssg = createServerSideHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: SuperJSON, // optional - adds superjson serialization
-  });
+  const ssg = generateSSGHelper();
 
   const slug = ctx.params?.slug;
 
