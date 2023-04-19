@@ -1,15 +1,14 @@
-import { type RouterOutputs, api } from "@/utils/api";
-import { LoadingSpinner } from "./loading";
 import Image from "next/image";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { type RouterOutputs } from "@/utils/api";
 
 dayjs.extend(relativeTime);
 
 type PostWithAuthor = RouterOutputs["posts"]["getAll"][number];
 
-const PostView = ({ post, author }: PostWithAuthor) => {
+export const PostView = ({ post, author }: PostWithAuthor) => {
   return (
     <div key={post.id} className="flex gap-4 border-b border-zinc-800 p-4">
       <Image
@@ -30,27 +29,6 @@ const PostView = ({ post, author }: PostWithAuthor) => {
         </div>
         <span className="text-2xl">{post.content}</span>
       </div>
-    </div>
-  );
-};
-
-export const Feed = () => {
-  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-
-  if (postsLoading)
-    return (
-      <div className="relative flex flex-col">
-        <LoadingSpinner />
-      </div>
-    );
-
-  if (!data) return <div>Something went wrong.</div>;
-
-  return (
-    <div className="flex flex-col">
-      {data?.map((post) => (
-        <PostView key={post.post.id} {...post} />
-      ))}
     </div>
   );
 };

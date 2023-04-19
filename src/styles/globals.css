@@ -11,6 +11,6 @@ html {
 }
 
 body {
-  @apply bg-black text-slate-100;
+  @apply bg-black text-slate-100 scrollbar-hide;
   overscroll-behavior: none;
 }

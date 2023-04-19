@@ -8,6 +8,7 @@ import { appRouter } from "@/server/api/root";
 import NextError from "next/error";
 import { PageLayout } from "@/components/page-layout";
 import Image from "next/image";
+import { ProfileFeed } from "@/components/profile-feed";
 
 const ProfilePage: NextPage<{ username: string }> = (props) => {
   const { data: userProfile } = api.profile.getUserByUsername.useQuery({
@@ -39,6 +40,7 @@ const ProfilePage: NextPage<{ username: string }> = (props) => {
           }`}</h1>
         </div>
         <div className="w-full border-b border-zinc-800"></div>
+        <ProfileFeed userId={userProfile.id} />
       </PageLayout>
     </>
   );
